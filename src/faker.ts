@@ -565,7 +565,7 @@ export class Faker {
    */
   fork(): Faker {
     const instance = new Faker({
-      locale: this.definitions,
+      locale: this.rawDefinitions,
     });
     instance._mersenne.copyStateFrom(this._mersenne);
     instance.setDefaultRefDate(this._defaultRefDate);
@@ -598,7 +598,7 @@ export class Faker {
    */
   derive(): Faker {
     const instance = new Faker({
-      locale: this.definitions,
+      locale: this.rawDefinitions,
     });
     instance.seed(this.number.int());
     instance.setDefaultRefDate(this._defaultRefDate);
