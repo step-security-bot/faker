@@ -12,6 +12,7 @@ module.exports = defineConfig({
     browser: true,
     node: true,
   },
+  reportUnusedDisableDirectives: true,
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -44,6 +45,13 @@ module.exports = defineConfig({
       {
         format: ['PascalCase'],
         selector: ['class', 'interface', 'typeAlias', 'enumMember'],
+        leadingUnderscore: 'forbid',
+        trailingUnderscore: 'forbid',
+      },
+      {
+        format: ['PascalCase'],
+        selector: ['typeParameter'],
+        prefix: ['T'],
         leadingUnderscore: 'forbid',
         trailingUnderscore: 'forbid',
       },

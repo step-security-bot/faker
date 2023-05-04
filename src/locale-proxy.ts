@@ -2,13 +2,17 @@ import type { LocaleDefinition } from './definitions';
 import { FakerError } from './errors/faker-error';
 
 /**
- * A proxy for LocaleDefinitions that marks all properties as required and throws an error when an entry is accessed that is not defined.
+ * A proxy for LocaleDefinition that marks all properties as required and throws an error when an entry is accessed that is not defined.
  */
 export type LocaleProxy = Readonly<{
-  [key in keyof LocaleDefinition]-?: Readonly<
-    Required<NonNullable<LocaleDefinition[key]>>
-  >;
+  [key in keyof LocaleDefinition]-?: LocaleProxyCategory<LocaleDefinition[key]>;
 }>;
+
+type LocaleProxyCategory<T> = Readonly<{
+  [key in keyof T]-?: LocaleProxyEntry<T[key]>;
+}>;
+
+type LocaleProxyEntry<T> = unknown extends T ? T : Readonly<NonNullable<T>>;
 
 const throwReadOnlyError: () => never = () => {
   throw new FakerError('You cannot edit the locale data on the faker instance');
@@ -31,6 +35,10 @@ export function createLocaleProxy(locale: LocaleDefinition): LocaleProxy {
       target: LocaleDefinition,
       categoryName: keyof LocaleDefinition
     ): LocaleDefinition[keyof LocaleDefinition] {
+      if (typeof categoryName === 'symbol' || categoryName === 'nodeType') {
+        return target[categoryName];
+      }
+
       if (categoryName in proxies) {
         return proxies[categoryName];
       }
@@ -53,23 +61,25 @@ export function createLocaleProxy(locale: LocaleDefinition): LocaleProxy {
  * @param categoryData The module to create the proxy for.
  */
 function createCategoryProxy<
-  CategoryData extends Record<string | symbol, unknown>
+  TCategoryData extends Record<string | symbol, unknown>
 >(
   categoryName: string,
-  categoryData: CategoryData = {} as CategoryData
-): Required<CategoryData> {
+  categoryData: TCategoryData = {} as TCategoryData
+): Required<TCategoryData> {
   return new Proxy(categoryData, {
-    has(target: CategoryData, entryName: keyof CategoryData): boolean {
+    has(target: TCategoryData, entryName: keyof TCategoryData): boolean {
       const value = target[entryName];
       return value != null;
     },
 
     get(
-      target: CategoryData,
-      entryName: keyof CategoryData
-    ): CategoryData[keyof CategoryData] {
+      target: TCategoryData,
+      entryName: keyof TCategoryData
+    ): TCategoryData[keyof TCategoryData] {
       const value = target[entryName];
-      if (value === null) {
+      if (typeof entryName === 'symbol' || entryName === 'nodeType') {
+        return value;
+      } else if (value === null) {
         throw new FakerError(
           `The locale data for '${categoryName}.${entryName.toString()}' aren't applicable to this locale.
   If you think this is a bug, please report it at: https://github.com/faker-js/faker`
@@ -87,5 +97,5 @@ function createCategoryProxy<
 
     set: throwReadOnlyError,
     deleteProperty: throwReadOnlyError,
-  }) as Required<CategoryData>;
+  }) as Required<TCategoryData>;
 }

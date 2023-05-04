@@ -94,7 +94,7 @@ export class SignatureTest {
    * @param b The string parameter.
    */
   optionalStringParamMethod(b?: string): number {
-    return +b;
+    return b ? 0 : 1;
   }
 
   /**
@@ -114,7 +114,7 @@ export class SignatureTest {
    * @param c The boolean parameter.
    */
   multiParamMethod(a: number, b?: string, c: boolean = true): number {
-    return c ? a : +b;
+    return c ? a : b ? 0 : 1;
   }
 
   /**
@@ -143,7 +143,7 @@ export class SignatureTest {
       excludes?: ReadonlyArray<AlphaNumericChar>;
     }
   ): string {
-    return value + options.format;
+    return options?.format ?? value;
   }
 
   /**
@@ -195,7 +195,7 @@ export class SignatureTest {
      */
     e: LiteralUnion<'a' | 'b'>;
   }): number {
-    return options.c ? options.a : +options.b;
+    return options.a;
   }
 
   /**
@@ -349,6 +349,7 @@ export class SignatureTest {
    * Complex array parameter.
    *
    * @template T The type of the entries to pick from.
+   *
    * @param array Array to pick the value from.
    * @param array[].weight The weight of the value.
    * @param array[].value The value to pick.

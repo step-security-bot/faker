@@ -18,8 +18,8 @@ function isMethodOf(mod: string) {
   return (meth: string) => typeof fakerEN[mod][meth] === 'function';
 }
 
-type SkipConfig<Module> = Partial<
-  Record<keyof Module, '*' | ReadonlyArray<keyof typeof allLocales>>
+type SkipConfig<TModule> = Partial<
+  Record<keyof TModule, '*' | ReadonlyArray<keyof typeof allLocales>>
 >;
 
 const BROKEN_LOCALE_METHODS = {
@@ -29,8 +29,8 @@ const BROKEN_LOCALE_METHODS = {
     companySuffix: ['az'],
   },
   location: {
-    state: ['az', 'nb_NO', 'sk'],
-    stateAbbr: ['sk'],
+    state: ['az', 'nb_NO', 'ro_MD', 'sk'],
+    stateAbbr: ['ro_MD', 'sk'],
     streetName: [
       'af_ZA',
       'ar',
@@ -42,6 +42,7 @@ const BROKEN_LOCALE_METHODS = {
       'en_CA',
       'en_GB',
       'en_GH',
+      'en_HK',
       'en_IE',
       'en_IN',
       'en_NG',
@@ -72,6 +73,8 @@ const BROKEN_LOCALE_METHODS = {
       'zh_TW',
       'zu_ZA',
     ],
+    zipCode: ['en_HK'],
+    zipCodeByState: ['en_HK'],
   },
   random: {
     locale: '*', // locale() has been pseudo removed
@@ -81,7 +84,7 @@ const BROKEN_LOCALE_METHODS = {
   },
   person: {
     prefix: ['az', 'id_ID', 'ru', 'zh_CN', 'zh_TW'],
-    suffix: ['az', 'it', 'mk', 'pt_PT', 'ru'],
+    suffix: ['az', 'it', 'mk', 'pt_PT', 'ro_MD', 'ru'],
     jobArea: ['ar', 'fr', 'fr_BE', 'fr_CA', 'fr_CH', 'fr_LU'],
     jobDescriptor: ['ar', 'fr', 'fr_BE', 'fr_CA', 'fr_CH', 'fr_LU'],
     jobTitle: ['ar', 'fr', 'fr_BE', 'fr_CA', 'fr_CH', 'fr_LU', 'ur'],

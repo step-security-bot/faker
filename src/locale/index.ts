@@ -20,6 +20,7 @@ import { faker as fakerEN_BORK } from './en_BORK';
 import { faker as fakerEN_CA } from './en_CA';
 import { faker as fakerEN_GB } from './en_GB';
 import { faker as fakerEN_GH } from './en_GH';
+import { faker as fakerEN_HK } from './en_HK';
 import { faker as fakerEN_IE } from './en_IE';
 import { faker as fakerEN_IN } from './en_IN';
 import { faker as fakerEN_NG } from './en_NG';
@@ -53,6 +54,7 @@ import { faker as fakerPL } from './pl';
 import { faker as fakerPT_BR } from './pt_BR';
 import { faker as fakerPT_PT } from './pt_PT';
 import { faker as fakerRO } from './ro';
+import { faker as fakerRO_MD } from './ro_MD';
 import { faker as fakerRU } from './ru';
 import { faker as fakerSK } from './sk';
 import { faker as fakerSR_RS_latin } from './sr_RS_latin';
@@ -84,6 +86,7 @@ export {
   fakerEN_CA,
   fakerEN_GB,
   fakerEN_GH,
+  fakerEN_HK,
   fakerEN_IE,
   fakerEN_IN,
   fakerEN_NG,
@@ -117,6 +120,7 @@ export {
   fakerPT_BR,
   fakerPT_PT,
   fakerRO,
+  fakerRO_MD,
   fakerRU,
   fakerSK,
   fakerSR_RS_latin,
@@ -149,6 +153,7 @@ export const allFakers = {
   en_CA: fakerEN_CA,
   en_GB: fakerEN_GB,
   en_GH: fakerEN_GH,
+  en_HK: fakerEN_HK,
   en_IE: fakerEN_IE,
   en_IN: fakerEN_IN,
   en_NG: fakerEN_NG,
@@ -182,6 +187,7 @@ export const allFakers = {
   pt_BR: fakerPT_BR,
   pt_PT: fakerPT_PT,
   ro: fakerRO,
+  ro_MD: fakerRO_MD,
   ru: fakerRU,
   sk: fakerSK,
   sr_RS_latin: fakerSR_RS_latin,

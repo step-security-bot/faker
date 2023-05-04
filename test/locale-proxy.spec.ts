@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import type { MetadataDefinitions } from '../src';
 import { en, FakerError } from '../src';
 import { createLocaleProxy } from '../src/locale-proxy';
 
 describe('LocaleProxy', () => {
   const locale = createLocaleProxy(en);
   const enAirline = en.airline ?? { never: 'missing' };
+
+  describe('locale', () => {
+    it('should be possible to use equals on locale', () => {
+      expect(locale).toEqual(createLocaleProxy(en));
+    });
+
+    it('should be possible to use not equals on locale', () => {
+      expect(locale).not.toEqual(createLocaleProxy({}));
+    });
+  });
 
   describe('category', () => {
     it('should be possible to check for a missing category', () => {
@@ -61,9 +70,9 @@ describe('LocaleProxy', () => {
     });
 
     it('should be possible to get all categories keys on empty locale', () => {
-      const empty = createLocaleProxy({ metadata: {} as MetadataDefinitions });
+      const empty = createLocaleProxy({});
 
-      expect(Object.keys(empty)).toEqual(['metadata']);
+      expect(Object.keys(empty)).toEqual([]);
     });
 
     it('should be possible to get all categories keys on actual locale', () => {
@@ -110,7 +119,6 @@ describe('LocaleProxy', () => {
 
     it('should not be possible to access an unavailable entry in a present category', () => {
       const unavailable = createLocaleProxy({
-        metadata: {} as MetadataDefinitions,
         airline: { airline: null },
       });
 

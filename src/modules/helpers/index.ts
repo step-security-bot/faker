@@ -83,6 +83,14 @@ function getRepetitionsBasedOnQuantifierParameters(
  * A number of methods can generate strings according to various patterns: [`replaceSymbols()`](https://next.fakerjs.dev/api/helpers.html#replacesymbols), [`replaceSymbolWithNumber()`](https://next.fakerjs.dev/api/helpers.html#replacesymbolwithnumber), and [`fromRegExp()`](https://next.fakerjs.dev/api/helpers.html#fromregexp).
  */
 export class HelpersModule {
+  /**
+   * Global store of unique values.
+   * This means that faker should *never* return duplicate values across all API methods when using `faker.helpers.unique` without passing `options.store`.
+   *
+   * @internal
+   */
+  private readonly uniqueStore: Record<RecordKey, RecordKey> = {};
+
   constructor(private readonly faker: Faker) {
     // Bind `this` so namespaced is working correctly
     for (const name of Object.getOwnPropertyNames(
@@ -269,7 +277,7 @@ export class HelpersModule {
     let max: number;
     let tmp: number;
     let repetitions: number;
-    let token = string.match(RANGE_REP_REG);
+    let token = RANGE_REP_REG.exec(string);
     while (token != null) {
       min = parseInt(token[2]);
       max = parseInt(token[3]);
@@ -285,23 +293,23 @@ export class HelpersModule {
         string.slice(0, token.index) +
         token[1].repeat(repetitions) +
         string.slice(token.index + token[0].length);
-      token = string.match(RANGE_REP_REG);
+      token = RANGE_REP_REG.exec(string);
     }
 
     // Deal with repeat `{num}`
-    token = string.match(REP_REG);
+    token = REP_REG.exec(string);
     while (token != null) {
       repetitions = parseInt(token[2]);
       string =
         string.slice(0, token.index) +
         token[1].repeat(repetitions) +
         string.slice(token.index + token[0].length);
-      token = string.match(REP_REG);
+      token = REP_REG.exec(string);
     }
     // Deal with range `[min-max]` (only works with numbers for now)
     //TODO: implement for letters e.g. [0-9a-zA-Z] etc.
 
-    token = string.match(RANGE_REG);
+    token = RANGE_REG.exec(string);
     while (token != null) {
       min = parseInt(token[1]); // This time we are not capturing the char before `[]`
       max = parseInt(token[2]);
@@ -316,7 +324,7 @@ export class HelpersModule {
         string.slice(0, token.index) +
         this.faker.number.int({ min, max }).toString() +
         string.slice(token.index + token[0].length);
-      token = string.match(RANGE_REG);
+      token = RANGE_REG.exec(string);
     }
 
     return string;
@@ -724,7 +732,7 @@ export class HelpersModule {
   /**
    * Returns the result of the callback if the probability check was successful, otherwise `undefined`.
    *
-   * @template T The type of result of the given callback.
+   * @template TResult The type of result of the given callback.
    *
    * @param callback The callback to that will be invoked if the probability check was successful.
    * @param options The options to use. Defaults to `{}`.
@@ -737,8 +745,8 @@ export class HelpersModule {
    *
    * @since 6.3.0
    */
-  maybe<T>(
-    callback: () => T,
+  maybe<TResult>(
+    callback: () => TResult,
     options: {
       /**
        * The probability (`[0.00, 1.00]`) of the callback being invoked.
@@ -747,7 +755,7 @@ export class HelpersModule {
        */
       probability?: number;
     } = {}
-  ): T | undefined {
+  ): TResult | undefined {
     if (this.faker.datatype.boolean(options)) {
       return callback();
     }
@@ -756,11 +764,13 @@ export class HelpersModule {
   }
 
   /**
-   * Returns a random key from given object or `undefined` if no key could be found.
+   * Returns a random key from given object.
    *
    * @template T The type of the object to select from.
    *
    * @param object The object to be used.
+   *
+   * @throws If the given object is empty.
    *
    * @example
    * faker.helpers.objectKey({ myProperty: 'myValue' }) // 'myProperty'
@@ -773,11 +783,13 @@ export class HelpersModule {
   }
 
   /**
-   * Returns a random value from given object or `undefined` if no key could be found.
+   * Returns a random value from given object.
    *
    * @template T The type of object to select from.
    *
    * @param object The object to be used.
+   *
+   * @throws If the given object is empty.
    *
    * @example
    * faker.helpers.objectValue({ myProperty: 'myValue' }) // 'myValue'
@@ -787,6 +799,27 @@ export class HelpersModule {
   objectValue<T extends Record<string, unknown>>(object: T): T[keyof T] {
     const key = this.faker.helpers.objectKey(object);
     return object[key];
+  }
+
+  /**
+   * Returns a random `[key, value]` pair from the given object.
+   *
+   * @template T The type of the object to select from.
+   *
+   * @param object The object to be used.
+   *
+   * @throws If the given object is empty.
+   *
+   * @example
+   * faker.helpers.objectEntry({ prop1: 'value1', prop2: 'value2' }) // ['prop1', 'value1']
+   *
+   * @since 8.0.0
+   */
+  objectEntry<T extends Record<string, unknown>>(
+    object: T
+  ): [keyof T, T[keyof T]] {
+    const key = this.faker.helpers.objectKey(object);
+    return [key, object[key]];
   }
 
   /**
@@ -957,7 +990,7 @@ export class HelpersModule {
    *
    * This does the same as `objectValue` except that it ignores (the values assigned to) the numeric keys added for TypeScript enums.
    *
-   * @template EnumType Type of generic enums, automatically inferred by TypeScript.
+   * @template T Type of generic enums, automatically inferred by TypeScript.
    *
    * @param enumObject Enum to pick the value from.
    *
@@ -973,11 +1006,11 @@ export class HelpersModule {
    *
    * @since 8.0.0
    */
-  enumValue<EnumType extends Record<string | number, string | number>>(
-    enumObject: EnumType
-  ): EnumType[keyof EnumType] {
+  enumValue<T extends Record<string | number, string | number>>(
+    enumObject: T
+  ): T[keyof T] {
     // ignore numeric keys added by TypeScript
-    const keys: Array<keyof EnumType> = Object.keys(enumObject).filter((key) =>
+    const keys: Array<keyof T> = Object.keys(enumObject).filter((key) =>
       isNaN(Number(key))
     );
     const randomKey = this.arrayElement(keys);
@@ -1078,7 +1111,7 @@ export class HelpersModule {
    *
    * @since 8.0.0
    */
-  fake(patterns: string[]): string;
+  fake(patterns: ReadonlyArray<string>): string;
   /**
    * Generator for combining faker methods based on a static string input or an array of static string inputs.
    *
@@ -1127,11 +1160,10 @@ export class HelpersModule {
    *
    * @since 7.4.0
    */
-  fake(pattern: string | string[]): string;
-  fake(pattern: string | string[]): string {
-    if (Array.isArray(pattern)) {
-      pattern = this.arrayElement(pattern);
-    }
+  fake(pattern: string | ReadonlyArray<string>): string;
+  fake(pattern: string | ReadonlyArray<string>): string {
+    pattern =
+      typeof pattern === 'string' ? pattern : this.arrayElement(pattern);
 
     // find first matching {{ and }}
     const start = pattern.search(/{{[a-z]/);
@@ -1248,7 +1280,7 @@ export class HelpersModule {
    * Generates a unique result using the results of the given method.
    * Used unique entries will be stored internally and filtered from subsequent calls.
    *
-   * @template Method The type of the method to execute.
+   * @template TMethod The type of the method to execute.
    *
    * @param method The method used to generate the values.
    * @param args The arguments used to call the method.
@@ -1272,14 +1304,14 @@ export class HelpersModule {
    * More info can be found in issue [faker-js/faker #1785](https://github.com/faker-js/faker/issues/1785).
    */
   unique<
-    Method extends (
+    TMethod extends (
       // TODO @Shinigami92 2023-02-14: This `any` type can be fixed by anyone if they want to.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...parameters: any[]
     ) => RecordKey
   >(
-    method: Method,
-    args: Parameters<Method> = [] as Parameters<Method>,
+    method: TMethod,
+    args: Parameters<TMethod> = [] as Parameters<TMethod>,
     options: {
       /**
        * This parameter does nothing.
@@ -1326,7 +1358,7 @@ export class HelpersModule {
        */
       store?: Record<RecordKey, RecordKey>;
     } = {}
-  ): ReturnType<Method> {
+  ): ReturnType<TMethod> {
     deprecated({
       deprecated: 'faker.helpers.unique',
       proposed:
@@ -1335,20 +1367,27 @@ export class HelpersModule {
       until: '9.0',
     });
 
-    const { maxTime = 50, maxRetries = 50 } = options;
+    const {
+      maxTime = 50,
+      maxRetries = 50,
+      exclude = [],
+      store = this.uniqueStore,
+    } = options;
     return uniqueExec.exec(method, args, {
       ...options,
       startTime: new Date().getTime(),
       maxTime,
       maxRetries,
       currentIterations: 0,
+      exclude,
+      store,
     });
   }
 
   /**
    * Generates an array containing values returned by the given method.
    *
-   * @template T The type of elements.
+   * @template TResult The type of elements.
    *
    * @param method The method used to generate the values.
    * @param options The optional options object.
@@ -1360,8 +1399,8 @@ export class HelpersModule {
    *
    * @since 8.0.0
    */
-  multiple<T>(
-    method: () => T,
+  multiple<TResult>(
+    method: () => TResult,
     options: {
       /**
        * The number or range of elements to generate.
@@ -1381,7 +1420,7 @@ export class HelpersModule {
             max: number;
           };
     } = {}
-  ): T[] {
+  ): TResult[] {
     const count = this.rangeToNumber(options.count ?? 3);
     if (count <= 0) {
       return [];

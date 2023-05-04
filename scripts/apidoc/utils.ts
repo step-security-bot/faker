@@ -43,10 +43,14 @@ export const pathOutputDir = resolve(pathDocsDir, 'api');
 
 // Functions
 
-export function mapByName<T extends { name: string }, V>(
-  input: T[],
-  valueExtractor: (item: T) => V
-): Record<string, V> {
+export function adjustUrls(description: string): string {
+  return description.replace(/https:\/\/(next.)?fakerjs.dev\//g, '/');
+}
+
+export function mapByName<TInput extends { name: string }, TValue>(
+  input: TInput[],
+  valueExtractor: (item: TInput) => TValue
+): Record<string, TValue> {
   return input.reduce(
     (acc, item) => ({ ...acc, [item.name]: valueExtractor(item) }),
     {}
