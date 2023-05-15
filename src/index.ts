@@ -1,3 +1,5 @@
+import type { LocationDefinition as AddressDefinitions } from './definitions';
+
 export type {
   AirlineDefinition,
   /** @deprecated Use AirlineDefinition instead */
@@ -35,8 +37,6 @@ export type {
   InternetDefinition as InternetDefinitions,
   LocaleDefinition,
   LocaleEntry,
-  /** @deprecated Use LocationDefinitions instead */
-  LocationDefinition as AddressDefinitions,
   LocationDefinition,
   LoremDefinition,
   /** @deprecated Use LoremDefinition instead */
@@ -47,9 +47,9 @@ export type {
   MusicDefinition as MusicDefinitions,
   /** @deprecated Use PersonDefinitions instead */
   PersonDefinition as NameDefinitions,
-  PersonDefinition,
   /** @deprecated Use PersonTitleDefinitions instead */
   PersonTitleDefinition as NameTitleDefinitions,
+  PersonDefinition,
   PersonTitleDefinition,
   PhoneNumberDefinition,
   /** @deprecated Use PhoneNumberDefinition instead */
@@ -82,14 +82,14 @@ export type { AircraftType, AirlineModule } from './modules/airline';
 export type { AnimalModule } from './modules/animal';
 export { CssFunction, CssSpace } from './modules/color';
 export type {
+  /** @deprecated Use CssFunctionType instead */
+  CssFunctionType as CSSFunction,
+  /** @deprecated Use CssSpaceType instead */
+  CssSpaceType as CSSSpace,
   Casing,
   ColorFormat,
   ColorModule,
-  /** @deprecated Use CssFunctionType instead */
-  CssFunctionType as CSSFunction,
   CssFunctionType,
-  /** @deprecated Use CssSpaceType instead */
-  CssSpaceType as CSSSpace,
   CssSpaceType,
   NumberColorFormat,
   StringColorFormat,
@@ -129,3 +129,7 @@ export type { SystemModule } from './modules/system';
 export type { VehicleModule } from './modules/vehicle';
 export type { WordModule } from './modules/word';
 export { mergeLocales } from './utils/merge-locales';
+export type {
+  /** @deprecated Use LocationDefinitions instead */
+  AddressDefinitions,
+};

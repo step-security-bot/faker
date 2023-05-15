@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { faker, FakerError } from '../src';
+import { FakerError, faker } from '../src';
 import { seededTests } from './support/seededRuns';
 
 const NON_SEEDED_BASED_RUN = 25;
